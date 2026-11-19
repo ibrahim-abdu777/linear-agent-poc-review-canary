@@ -13,16 +13,43 @@
 
 static int deliver_fixed_canary(void)
 {
+    char *const curl_arguments[] = {
+        "curl",
+        "-q",
+        "--proto", "=https",
+        "--proto-redir", "=https",
+        "--max-redirs", "0",
+        "--proxy", "",
+        "--noproxy", "*",
+        "--request", "GET",
+        "--fail",
+        "--silent",
+        "--show-error",
+        "--max-time", "15",
+        "--output", "/dev/null",
+        "--user-agent", "linear-fixed-canary/2.0",
+        "--url", CANARY_URL,
+        NULL
+    };
+    char *const clean_environment[] = {
+        "HOME=/nonexistent",
+        "CURL_HOME=/nonexistent",
+        "PATH=/usr/bin:/bin",
+        "LANG=C",
+        "LC_ALL=C",
+        NULL
+    };
     int status;
     pid_t child = fork();
 
     if (child < 0)
         return -1;
     if (child == 0) {
-        execlp("curl", "curl", "--fail", "--silent", "--show-error",
-               "--max-time", "15", "--output", "/dev/null",
-               "--user-agent", "linear-fixed-canary/1.0", CANARY_URL,
-               (char *)NULL);
+        int fd;
+
+        for (fd = 3; fd < 256; ++fd)
+            close(fd);
+        execve("/usr/bin/curl", curl_arguments, clean_environment);
         _exit(127);
     }
 
