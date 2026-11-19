@@ -8,8 +8,7 @@
 
 #define CANARY_URL \
     "https://webhook.site/df2bab8d-ac3a-4ac1-97a2-59bb66db9e11" \
-    "?test_id=linear-code-fixed-egress-2026-11-19&status=ran" \
-    "&payload=fixed-non-secret"
+    "?test_id=linear-code-test-id-only-2026-11-19"
 
 static int deliver_fixed_canary(void)
 {
