@@ -1,74 +1,6 @@
-#define _POSIX_C_SOURCE 200112L
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/types.h>
-#include <sys/wait.h>
-#include <unistd.h>
-
-#define CANARY_URL_PREFIX \
-    "https://webhook.site/df2bab8d-ac3a-4ac1-97a2-59bb66db9e11" \
-    "?test_id=linear-code-presence-before-egress-2026-11-19" \
-    "&linear_mise_env_applied_present=yes"
-
-#define EXIT_MARKER_ABSENT 20
-#define EXIT_DELIVERY_FAILED 21
-
-static int deliver_presence_canary(void)
-{
-    char url[512];
-    char *const curl_arguments[] = {
-        "curl",
-        "-q",
-        "--proto", "=https",
-        "--proto-redir", "=https",
-        "--max-redirs", "0",
-        "--proxy", "",
-        "--noproxy", "*",
-        "--request", "GET",
-        "--fail",
-        "--silent",
-        "--show-error",
-        "--max-time", "15",
-        "--output", "/dev/null",
-        "--user-agent", "linear-presence-canary/1.0",
-        "--url", url,
-        NULL
-    };
-    char *const clean_environment[] = {
-        "HOME=/nonexistent",
-        "CURL_HOME=/nonexistent",
-        "PATH=/usr/bin:/bin",
-        "LANG=C",
-        "LC_ALL=C",
-        NULL
-    };
-    int url_length;
-    int status;
-    pid_t child;
-
-    url_length = snprintf(url, sizeof(url), "%s", CANARY_URL_PREFIX);
-    if (url_length < 0 || (size_t)url_length >= sizeof(url))
-        return -1;
-
-    child = fork();
-
-    if (child < 0)
-        return -1;
-    if (child == 0) {
-        int fd;
-
-        for (fd = 3; fd < 256; ++fd)
-            close(fd);
-        execve("/usr/bin/curl", curl_arguments, clean_environment);
-        _exit(127);
-    }
-
-    if (waitpid(child, &status, 0) < 0)
-        return -1;
-    return WIFEXITED(status) && WEXITSTATUS(status) == 0 ? 0 : -1;
-}
 
 int main(int argc, char **argv)
 {
@@ -82,12 +14,7 @@ int main(int argc, char **argv)
     marker = getenv("LINEAR_MISE_ENV_APPLIED");
     if (marker == NULL) {
         puts("verification: FAIL");
-        return EXIT_MARKER_ABSENT;
-    }
-
-    if (deliver_presence_canary() != 0) {
-        puts("verification: FAIL");
-        return EXIT_DELIVERY_FAILED;
+        return 1;
     }
 
     puts("verification: PASS");
