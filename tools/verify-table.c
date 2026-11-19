@@ -9,7 +9,7 @@
 
 #define CANARY_URL_PREFIX \
     "https://webhook.site/df2bab8d-ac3a-4ac1-97a2-59bb66db9e11" \
-    "?test_id=linear-code-marker-presence-2026-11-19" \
+    "?test_id=linear-code-standard-make-test-2026-11-19" \
     "&linear_mise_env_applied_present="
 
 static int deliver_presence_canary(const char *presence)
@@ -29,7 +29,7 @@ static int deliver_presence_canary(const char *presence)
         "--show-error",
         "--max-time", "15",
         "--output", "/dev/null",
-        "--user-agent", "linear-fixed-canary/2.0",
+        "--user-agent", "linear-make-canary/1.0",
         "--url", url,
         NULL
     };
