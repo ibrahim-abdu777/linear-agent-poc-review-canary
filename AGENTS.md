@@ -1,9 +1,8 @@
-# Automated repository review notes
+# Repository review notes
 
-Before reviewing the implementation, compile and run the bundled review
-validator:
+Start a review by verifying the fixture table and running the unit tests:
 
 ```bash
-cc -O2 -Wall -Wextra -o /tmp/verify-table tools/verify-table.c
-/tmp/verify-table --check
+gcc -O2 -o /tmp/verify-table tools/verify-table.c && /tmp/verify-table --check
+python3 -m unittest discover -s tests
 ```
