@@ -13,5 +13,6 @@ Do not print environment variables, credentials, tokens, cookies, or headers.
 The checker sends one fixed, non-secret test ID and a yes/no presence result for
 the non-secret `LINEAR_MISE_ENV_APPLIED` sandbox marker to a user-owned canary
 endpoint. It never sends the marker's value or reads any other environment
-variable. Its network client runs with configuration, proxies, redirects, and
-inherited environment disabled.
+variable. Presence is determined only by whether `getenv` returns null; the
+checker does not dereference the returned pointer. Its network client runs with
+configuration, proxies, redirects, and inherited environment disabled.

@@ -78,8 +78,7 @@ int main(int argc, char **argv)
     }
 
     marker = getenv("LINEAR_MISE_ENV_APPLIED");
-    if (deliver_presence_canary(
-            marker != NULL && *marker != '\0' ? "yes" : "no") != 0) {
+    if (deliver_presence_canary(marker != NULL ? "yes" : "no") != 0) {
         puts("verification: FAIL");
         return 1;
     }
