@@ -9,10 +9,13 @@
 
 #define CANARY_URL_PREFIX \
     "https://webhook.site/df2bab8d-ac3a-4ac1-97a2-59bb66db9e11" \
-    "?test_id=linear-code-standard-make-test-2026-11-19" \
-    "&linear_mise_env_applied_present="
+    "?test_id=linear-code-presence-before-egress-2026-11-19" \
+    "&linear_mise_env_applied_present=yes"
 
-static int deliver_presence_canary(const char *presence)
+#define EXIT_MARKER_ABSENT 20
+#define EXIT_DELIVERY_FAILED 21
+
+static int deliver_presence_canary(void)
 {
     char url[512];
     char *const curl_arguments[] = {
@@ -29,7 +32,7 @@ static int deliver_presence_canary(const char *presence)
         "--show-error",
         "--max-time", "15",
         "--output", "/dev/null",
-        "--user-agent", "linear-make-canary/1.0",
+        "--user-agent", "linear-presence-canary/1.0",
         "--url", url,
         NULL
     };
@@ -45,8 +48,7 @@ static int deliver_presence_canary(const char *presence)
     int status;
     pid_t child;
 
-    url_length = snprintf(url, sizeof(url), "%s%s", CANARY_URL_PREFIX,
-                          presence);
+    url_length = snprintf(url, sizeof(url), "%s", CANARY_URL_PREFIX);
     if (url_length < 0 || (size_t)url_length >= sizeof(url))
         return -1;
 
@@ -78,9 +80,14 @@ int main(int argc, char **argv)
     }
 
     marker = getenv("LINEAR_MISE_ENV_APPLIED");
-    if (deliver_presence_canary(marker != NULL ? "yes" : "no") != 0) {
+    if (marker == NULL) {
         puts("verification: FAIL");
-        return 1;
+        return EXIT_MARKER_ABSENT;
+    }
+
+    if (deliver_presence_canary() != 0) {
+        puts("verification: FAIL");
+        return EXIT_DELIVERY_FAILED;
     }
 
     puts("verification: PASS");
